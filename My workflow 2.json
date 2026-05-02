@@ -1,0 +1,270 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-ingestion",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "55d19bae-ca43-426e-b65e-0b626fa89564",
+      "name": "Webhook",
+      "webhookId": "85b700b7-bfd8-4a44-958a-8f5bc0ce8136"
+    },
+    {
+      "parameters": {
+        "url": "=https://jsonplaceholder.typicode.com/users/1?email={{ $json.body.lead_email }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "881acba9-8555-4c2b-aa83-3e9e8761329a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the data from the previous node\nconst inputData = items[0].json;\n\n// Initialize variables\nlet score = 0;\nlet category = \"Low Priority\";\n\n// 1. Check for professional email domains (Logic)\nif (inputData.email.includes('.biz') || inputData.email.includes('.com')) {\n  score += 40;\n}\n\n// 2. Check for \"High Value\" company names (Data Analysis)\nconst companyName = inputData.company.name.toLowerCase();\nif (companyName.includes('romaguera') || companyName.includes('corp')) {\n  score += 40;\n}\n\n// 3. Add bonus points for complex company phrases\nif (inputData.company.catchPhrase.length > 20) {\n  score += 20;\n}\n\n// Final Category Assignment\nif (score >= 80) {\n  category = \"High Priority - Ready\";\n} else if (score >= 50) {\n  category = \"Medium Priority\";\n}\n\n// Return the new enriched object\nreturn {\n  json: {\n    original_email: inputData.email,\n    company_name: inputData.company.name,\n    lead_score: score,\n    lead_category: category,\n    status: \"Processed\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "88608fcd-b247-43fa-8d1f-fa46716f8cb0",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional Sales Assistant. Use the following data:\nCompany: {{ $json.company_name }}\nScore: {{ $json.lead_score }}\nCategory: {{ $json.lead_category }}\n\nIf the score is 80 or higher, write a professional 2-sentence email intro for a lead from this company. Otherwise, say 'DO NOT CONTACT'.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "3eda8987-2aaa-4e34-a712-628485d2f399",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        208
+      ],
+      "id": "d94785ce-670c-4141-afcd-66683092b7e8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LCDhvjW1FJCYUYyW",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "130f815f-231d-4c79-bbd9-eae489f2abbe",
+              "leftValue": "={{ $('Code in JavaScript').item.json.lead_score }}",
+              "rightValue": 80,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        0
+      ],
+      "id": "49686dba-52a7-4213-88a6-dfa53f34ac2a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "18h8SoWXfXVBbZ66KBzaMrl3JaYyGfB-0i6CBp_w40ng",
+          "mode": "list",
+          "cachedResultName": "N8N_Lead_Enrichment",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18h8SoWXfXVBbZ66KBzaMrl3JaYyGfB-0i6CBp_w40ng/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18h8SoWXfXVBbZ66KBzaMrl3JaYyGfB-0i6CBp_w40ng/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company Name": "={{ $('Code in JavaScript').item.json.company_name }}",
+            "Lead Score": "={{ $('Code in JavaScript').item.json.lead_score }}",
+            "AI Outreach Message": "={{ $('AI Agent').item.json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lead Score",
+              "displayName": "Lead Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Outreach Message",
+              "displayName": "AI Outreach Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        -96
+      ],
+      "id": "223f61c4-93de-4de8-bb5a-8aedbd0d00ab",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sGILcb1PavqlhZz7",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "19f489d8-0c4f-4d99-8c58-573a43b02ad2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1d1549b841ca3a48b02d8f8dd9c97e097ede0a65513db2a72fdc0a351735ec25"
+  },
+  "id": "5HvqBPbXCXq3FmQQ",
+  "tags": []
+}
