@@ -1,36 +1,51 @@
-# AI-Driven Lead Enrichment Pipeline 🚀
+# 🚀 AI-Driven Lead Enrichment Pipeline (n8n + Gemini Pro)
 
-A modular automation system that transforms raw lead data into high-priority sales opportunities using Agentic AI and custom scoring logic.
+![Lead Enrichment Workflow Architecture](Lead_enrichment_workflow2.png)
 
-## 🛠️ Tech Stack
-* **Orchestration:** n8n (iPaaS)
-* **LLM Engine:** Google Gemini Pro
-* **Logic:** Node.js / JavaScript
-* **Database:** Google Sheets API
-* **Ingestion:** Webhook / REST API
+A modular, event-driven automation system that transforms raw inbound lead data into qualified, high-priority sales opportunities using **Agentic AI** and custom algorithmic scoring logic.
+
+---
 
 ## 📋 Features
-* **Custom Scoring Engine:** A JavaScript-based logic layer that evaluates leads based on company size, industry, and source.
-* **AI Decision Layer:** Utilizes Gemini Pro to analyze lead context and draft personalized, two-sentence outreach messages.
-* **Conditional Routing:** Automatically filters low-priority leads ("Do Not Contact") to keep your database clean.
-* **Real-Time Sync:** Appends enriched data to Google Sheets instantly for sales team action.
+
+* **Custom Scoring Engine:** JavaScript-based evaluation layer that dynamically computes lead quality scores based on company size, industry vertical, and acquisition source.
+* **AI Decision Layer:** Integrates **Google Gemini Pro** to analyze prospect contextual data and generate tailored, 2-sentence cold outreach hooks.
+* **Conditional Routing:** Smart IF branching that isolates low-priority leads (`Do Not Contact`) to preserve database hygiene and sender reputation.
+* **Real-Time Database Sync:** Automatically appends enriched records with computed scores and AI drafts directly to Google Sheets for immediate sales action.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Workflow Orchestration:** `n8n (Self-Hosted / Cloud)`
+* **LLM Engine:** `Google Gemini Pro API`
+* **Custom Logic & Parsing:** `JavaScript (Node.js runtime)`
+* **Database & CRM:** `Google Sheets API`
+* **Ingestion Layer:** `Webhook / REST API`
+
+---
+
+## 📐 Pipeline Architecture
+
+[Inbound Webhook Trigger] ➔ [JS Lead Scoring Engine] ➔ [Gemini Pro AI Node] ➔ [Conditional Filter Switch] ➔ [Google Sheets CRM Sync]
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-* An **n8n** instance (Cloud or Desktop).
+* An active **n8n** instance (Docker self-hosted or n8n Cloud).
 * A **Google Gemini API Key**.
-* A Google Cloud Console project with **Google Sheets API** enabled.
+* A Google Cloud Console project with **Google Sheets API** enabled and OAuth2 credentials configured.
 
 ### Installation
-1. **Import Workflow:** Download the `workflow.json` from this repo and import it into your n8n canvas.
-2. **Configure Credentials:** 
-   - Add your Gemini API key in the AI Agent node.
-   - Connect your Google account in the Google Sheets node.
-3. **Environment Setup:** Ensure your webhook is set to "Production" for 24/7 automation.
+1. **Import Blueprint:** Download the `workflow.json` file from this repository and import it into your n8n workspace.
+2. **Configure Credentials:**
+   * Add your Gemini API key inside the **Google Gemini / AI Agent** node.
+   * Connect your Google account inside the **Google Sheets** node.
+3. **Deploy Webhook:** Switch the Webhook node from *Test* to **Production** URL and toggle the workflow to **Active / Published** for 24/7 autonomous ingestion.
 
-## 📊 Logic Visualization
-![Project Infographic](watermarked_img_8425199458760296222.png)
+---
 
 ## 📄 License
-MIT License - feel free to use this for your own automation projects!
+This project is licensed under the [MIT License](LICENSE).
